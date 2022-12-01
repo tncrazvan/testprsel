@@ -1,0 +1,8 @@
+/.svelte-kit
+/package
+/dist
+node_modules
+.idea
+.sourcemaps
+*.map
+.DS_Store
