@@ -25,6 +25,6 @@ function(
         yield $parser->save("./resources/numbers.csv", $file->getContents());
         return ok();
     } catch(\Error $e) {
-        return error($e->getMessage());
+        return error(Status::INTERNAL_SERVER_ERROR, $e->getMessage());
     }
 };
