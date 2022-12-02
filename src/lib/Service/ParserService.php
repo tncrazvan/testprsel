@@ -34,11 +34,11 @@ class ParserService {
      * @return ParserResult
      */
     public function tryCorrect(string $id, string $number):ParserResult {
-        static $pattern = '/([0-9]+)/';
+        static $pattern = '/([^0-9]+)/';
         
         $removed = [];
 
-        $corrected = preg_replace_callback('/([^0-9]+)/', function($matches) use (&$removed) {
+        $corrected = preg_replace_callback($pattern, function($matches) use (&$removed) {
             $removed[] = $matches[1] ?? '';
             return '';
         }, $number);
