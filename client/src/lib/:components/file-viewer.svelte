@@ -29,14 +29,18 @@
   <progress class="progress w-56" />
 {:then r}
   {@const results = r.data.data}
-  <div class="overflow-x-auto fixed left-0 right-0 top-0 bottom-0">
+  <div class="fixed left-0 right-0 top-0 bottom-0 grid grid-cols-2">
+  <div class="overflow-x-auto">
+    <div class="text-center p-4">
+      <span class="text-3xl text-success">Successful corrections</span>
+    </div>
     <table class="table table-zebra table-compact h-full w-full">
       <thead>
         <tr>
-          <th>ID</th>
-          <th>Original</th>
-          <th>Corrected</th>
-          <th>Removed</th>
+          <td>ID</td>
+          <td>Original</td>
+          <td>Corrected</td>
+          <td>Removed</td>
         </tr>
       </thead>
       <tbody>
@@ -47,12 +51,37 @@
             <td>{result.corrected}</td>
             <td>
               {#each result.removed as removed}
-                <span class="text-red-600">{result.removed}</span>
+                <span class="text-green-600">{result.removed}</span>
                 <div class="pt-2" />
               {/each}
             </td>
           </tr>
         {/each}
+      </tbody>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Original</th>
+          <th>Corrected</th>
+          <th>Removed</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+  <div class="overflow-x-auto">
+    <div class="text-center p-4">
+      <span class="text-3xl text-error">Failed corrections</span>
+    </div>
+    <table class="table table-zebra table-compact h-full w-full">
+      <thead>
+        <tr>
+          <td>ID</td>
+          <td>Original</td>
+          <td>Corrected</td>
+          <td>Removed</td>
+        </tr>
+      </thead>
+      <tbody>
         {#each results.filter(r => !r.isCorrect) as result}
           <tr>
             <td>{result.id}</td>
@@ -77,6 +106,7 @@
       </thead>
     </table>
   </div>
+</div>
 {:catch error}
   <div class="text-center">
     <span>{error}</span>

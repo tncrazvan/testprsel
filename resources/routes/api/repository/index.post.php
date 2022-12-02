@@ -14,9 +14,9 @@ return
 function(
     ParserService $parser,
     #[Body] string $content,
-){
-    try{
-        yield $parser->save("./resources/numbers.csv", $content);
+) {
+    try {
+        yield $parser->save("./resources/numbers.csv", base64_decode($content));
         return ok();
     } catch(\Error $e) {
         return error($e->getMessage());

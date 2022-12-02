@@ -17,11 +17,12 @@ function(
     #[Body] array $payload
 ) {
     if (empty($number = $payload['number'] ?? '')) {
-        return error(Status::BAD_REQUEST, "A a \"number\" property is required in order to execute a test.");
+        return error(Status::BAD_REQUEST, "A number is required in order to execute a test.");
     }
 
-    $result = $parser->tryCorrect(0, $number);
-
+    $result            = $parser->tryCorrect(0, $number);
+    $result->isCorrect = $parser->isCorrect($result->corrected);
+    
     if (!$result->isCorrect) {
         return ok($result, 'Number is incorrect.', Status::NOT_ACCEPTABLE);
     }

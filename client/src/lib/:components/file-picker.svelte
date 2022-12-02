@@ -46,7 +46,7 @@
 
 {#if error}
   <div class="text-center">
-    <span>error.message</span>
+    <span>{error.message}</span>
   </div>
 {/if}
 
@@ -67,7 +67,7 @@
   class="btn btn-primary"
   on:mousedown={async () => {
     try {
-      const response = await axios.post('/api/repository', base64, {
+      const response = await axios.post('/api/repository', base64.split('base64,')[1]??'', {
         headers: {
           'content-type': 'text/plain',
         },

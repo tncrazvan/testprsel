@@ -22,7 +22,7 @@
       $result = response.data.data
     } catch (e) {
       /** @ts-ignore */
-      if ((e.response?.status ?? 500) === 406) {
+      if ([406, 400].includes(e.response?.status ?? 500)) {
         /** @ts-ignore */
         $result = e.response.data.data as ParserResult
         /** @ts-ignore */

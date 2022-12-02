@@ -1,7 +1,7 @@
 <script lang="ts">
   import FilePicker from ':components/file-picker.svelte'
   import FileViewer from ':components/file-viewer.svelte'
-  import Tester from ':components/Tester.svelte'
+  import Tester from ':components/tester.svelte'
   import { Route, Router } from 'svelte-routing'
 </script>
 
