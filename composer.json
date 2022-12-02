@@ -11,7 +11,9 @@
             "XDEBUG_MODE=off php ./vendor/bin/php-cs-fixer fix tests"
         ],
         "action:test": [],
-        "test": [],
+        "test": [
+            "XDEBUG_MODE=debug php -dxdebug.mode=debug -dxdebug.start_with_request=yes ./vendor/bin/phpunit tests/TestSuite.php"
+        ],
         "start": "XDEBUG_MODE=debug php ./bin/start -e./src/main.php -l./src/lib/ -i",
         "watch": "XDEBUG_MODE=debug php ./bin/start -e./src/main.php -l./src/lib/ -r./resources/ -i -w",
         "build": "XDEBUG_MODE=off php -dphar.readonly=0 ./product.phar --build-config --build",
