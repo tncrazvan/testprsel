@@ -7,13 +7,21 @@ use function Amp\File\isDirectory;
 use function Amp\File\read;
 use function Amp\File\write;
 
+use Amp\Http\Server\Request;
 use App\ParserResult;
 use App\Service\ParserService;
 
 use CatPaw\Attributes\Option;
 use function CatPaw\CUI\text;
-
 use function CatPaw\uuid;
+use CatPaw\Web\Attributes\Header;
+
+use function CatPaw\Web\fileServer;
+
+
+use CatPaw\Web\HttpConfiguration;
+
+use CatPaw\Web\Services\ByteRangeService;
 use CatPaw\Web\Utilities\Route;
 
 use CatPaw\Web\WebServer;
@@ -27,10 +35,37 @@ function main(
 ) {
     if (false !== $serve) {
         $interface = $serve?$serve:'127.0.0.1:8000';
+
+        Route::notFound(function(
+            HttpConfiguration $config,
+            #[Header("range")] false | array $range,
+            Request $request,
+            ByteRangeService $byterange,
+            LoggerInterface $logger,
+        ):mixed {
+            static $fileServer = false;
+            if (!$fileServer) {
+                $fileServer = fileServer($config, fn (string $path):string => match ($path) {
+                    '/file-picker' => '/index.html',
+                    '/file-viewer' => '/index.html',
+                    default        => $path,
+                });
+            }
+            
+            return ($fileServer)(
+                $range,
+                $request,
+                $byterange,
+                $logger,
+            );
+        });
+
         yield WebServer::start(
             interfaces: $interface,
         );
+
         echo Route::describe().PHP_EOL;
+        
         return;
     }
 
