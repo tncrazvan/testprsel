@@ -3398,7 +3398,7 @@ class Route extends SvelteComponent {
 function create_if_block$1(ctx) {
   let div;
   let span;
-  let t_value = ctx[3].message + "";
+  let t_value = ctx[2].message + "";
   let t;
   return {
     c() {
@@ -3413,7 +3413,7 @@ function create_if_block$1(ctx) {
       append(span, t);
     },
     p(ctx2, dirty) {
-      if (dirty & 8 && t_value !== (t_value = ctx2[3].message + ""))
+      if (dirty & 4 && t_value !== (t_value = ctx2[2].message + ""))
         set_data(t, t_value);
     },
     d(detaching) {
@@ -3456,7 +3456,7 @@ function create_fragment$3(ctx) {
   let mounted;
   let dispose;
   icon0 = new Icon({ props: { path: mdiListBox } });
-  let if_block = ctx[3] && create_if_block$1(ctx);
+  let if_block = ctx[2] && create_if_block$1(ctx);
   icon1 = new Icon({ props: { path: mdiFile } });
   icon2 = new Icon({ props: { path: mdiUpload } });
   return {
@@ -3511,7 +3511,7 @@ function create_fragment$3(ctx) {
       append(div0, span0);
       insert(target, t2, anchor);
       insert(target, input, anchor);
-      ctx[6](input);
+      ctx[5](input);
       insert(target, t3, anchor);
       if (if_block)
         if_block.m(target, anchor);
@@ -3538,17 +3538,17 @@ function create_fragment$3(ctx) {
       current = true;
       if (!mounted) {
         dispose = [
-          listen(div0, "mousedown", ctx[5]),
-          listen(input, "change", ctx[4]),
-          listen(div4, "mousedown", ctx[7]),
-          listen(div6, "mousedown", ctx[8])
+          listen(div0, "mousedown", ctx[4]),
+          listen(input, "change", ctx[3]),
+          listen(div4, "mousedown", ctx[6]),
+          listen(div6, "mousedown", ctx[7])
         ];
         mounted = true;
       }
     },
     p(ctx2, [dirty]) {
       var _a2, _b2;
-      if (ctx2[3]) {
+      if (ctx2[2]) {
         if (if_block) {
           if_block.p(ctx2, dirty);
         } else {
@@ -3585,7 +3585,7 @@ function create_fragment$3(ctx) {
         detach(t2);
       if (detaching)
         detach(input);
-      ctx[6](null);
+      ctx[5](null);
       if (detaching)
         detach(t3);
       if (if_block)
@@ -3624,7 +3624,6 @@ function create_fragment$3(ctx) {
 function instance$2($$self, $$props, $$invalidate) {
   let fileInput;
   let file = null;
-  let base64 = "";
   let error = null;
   const fileChange = async (e) => {
     var _a, _b, _c;
@@ -3634,9 +3633,7 @@ function instance$2($$self, $$props, $$invalidate) {
       $$invalidate(1, file = null);
     }
     if (file) {
-      $$invalidate(2, base64 = await fileToBase64(file));
-    } else {
-      $$invalidate(2, base64 = "");
+      await fileToBase64(file);
     }
   };
   const mousedown_handler = () => navigate("/file-viewer");
@@ -3648,21 +3645,23 @@ function instance$2($$self, $$props, $$invalidate) {
   }
   const mousedown_handler_1 = () => fileInput.click();
   const mousedown_handler_2 = async () => {
-    var _a;
     try {
-      const response = await axios$1.post("/api/repository", (_a = base64.split("base64,")[1]) != null ? _a : "", {
-        headers: { "content-type": "text/plain" }
+      if (!file)
+        return;
+      const form = new FormData();
+      form.append("file", file);
+      const response = await axios$1.post("/api/repository", form, {
+        headers: { "content-type": "multipart/form-data" }
       });
       navigate("/file-viewer");
     } catch (e) {
       console.error(e);
-      $$invalidate(3, error = e);
+      $$invalidate(2, error = e);
     }
   };
   return [
     fileInput,
     file,
-    base64,
     error,
     fileChange,
     mousedown_handler,

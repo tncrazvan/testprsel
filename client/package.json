@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "vite build && npx cap sync",
+    "build": "vite build && rm ../resources/www/ -fr && mkdir ../resources/www/ && cp dist/* ../resources/www/ -fr && npx cap sync",
     "serve": "vite preview",
     "start": "npx cap open android",
     "check": "svelte-check --tsconfig ./tsconfig.json",
