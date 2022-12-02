@@ -11,9 +11,10 @@ use App\ParserResult;
 use App\Service\ParserService;
 
 use CatPaw\Attributes\Option;
-
 use function CatPaw\CUI\text;
+
 use function CatPaw\uuid;
+use CatPaw\Web\Utilities\Route;
 
 use CatPaw\Web\WebServer;
 use Psr\Log\LoggerInterface;
@@ -29,6 +30,7 @@ function main(
         yield WebServer::start(
             interfaces: $interface,
         );
+        echo Route::describe().PHP_EOL;
         return;
     }
 

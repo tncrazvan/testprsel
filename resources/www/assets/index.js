@@ -3803,10 +3803,10 @@ function create_then_block(ctx) {
           <th>Original</th> 
           <th>Corrected</th> 
           <th>Removed</th></tr>`;
-      attr(div0, "class", "text-center p-4");
+      attr(div0, "class", "text-start p-4");
       attr(table0, "class", "table table-zebra table-compact h-full w-full");
       attr(div1, "class", "overflow-x-auto");
-      attr(div2, "class", "text-center p-4");
+      attr(div2, "class", "text-start p-4");
       attr(table1, "class", "table table-zebra table-compact h-full w-full");
       attr(div3, "class", "overflow-x-auto");
       attr(div4, "class", "fixed left-0 right-0 top-0 bottom-0 grid grid-cols-2");
@@ -4002,37 +4002,32 @@ function create_each_block_2(ctx) {
   };
 }
 function create_each_block_1(ctx) {
-  let t0;
   let span;
-  let t1_value = ctx[4].removed + "";
+  let t0_value = ctx[4].removed + "";
+  let t0;
   let t1;
-  let t2;
   let div;
   return {
     c() {
-      t0 = text("- ");
       span = element("span");
-      t1 = text(t1_value);
-      t2 = space();
+      t0 = text(t0_value);
+      t1 = space();
       div = element("div");
       attr(span, "class", "text-red-800");
       attr(div, "class", "pt-2");
     },
     m(target, anchor) {
-      insert(target, t0, anchor);
       insert(target, span, anchor);
-      append(span, t1);
-      insert(target, t2, anchor);
+      append(span, t0);
+      insert(target, t1, anchor);
       insert(target, div, anchor);
     },
     p: noop$1,
     d(detaching) {
       if (detaching)
-        detach(t0);
-      if (detaching)
         detach(span);
       if (detaching)
-        detach(t2);
+        detach(t1);
       if (detaching)
         detach(div);
     }

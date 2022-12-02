@@ -31,7 +31,7 @@
   {@const results = r.data.data}
   <div class="fixed left-0 right-0 top-0 bottom-0 grid grid-cols-2">
   <div class="overflow-x-auto">
-    <div class="text-center p-4">
+    <div class="text-start p-4">
       <span class="text-3xl text-success">Successful corrections</span>
     </div>
     <table class="table table-zebra table-compact h-full w-full">
@@ -69,7 +69,7 @@
     </table>
   </div>
   <div class="overflow-x-auto">
-    <div class="text-center p-4">
+    <div class="text-start p-4">
       <span class="text-3xl text-error">Failed corrections</span>
     </div>
     <table class="table table-zebra table-compact h-full w-full">
@@ -89,7 +89,7 @@
             <td>{result.corrected}</td>
             <td>
               {#each result.removed as removed}
-                - <span class="text-red-800">{result.removed}</span>
+                <span class="text-red-800">{result.removed}</span>
                 <div class="pt-2" />
               {/each}
             </td>
