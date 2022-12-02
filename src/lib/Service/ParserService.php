@@ -84,7 +84,7 @@ class ParserService {
                 yield createDirectoryRecursively($dirName);
             } else {
                 if (yield isDirectory($dirName)) {
-                    yield deleteDirectoryRecursively($dirName);
+                    // yield deleteDirectoryRecursively($dirName);
                     yield createDirectoryRecursively($dirName);
                 } else {
                     yield deleteFile($dirName);
@@ -92,6 +92,15 @@ class ParserService {
             }
             yield write($fileName, $content);
         });
+    }
+
+    /**
+     * @param  string        $fileName
+     * @throws Error
+     * @return Promise<void>
+     */
+    public function delete(string $fileName):Promise {
+        return deleteFile($fileName);
     }
 
     /**
