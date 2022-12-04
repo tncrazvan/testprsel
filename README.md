@@ -9,7 +9,7 @@ Php8.1+ and the following extensions are required
 I suggest you also install `sudo apt install php8.1-curl`.
 
 
-## Prebuilt binaries.
+## Prebuilt binaries
 
 You can download the prebuilt binaries from [here](https://github.com/tncrazvan/testprsel/releases).
 ## Build from source
