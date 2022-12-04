@@ -5,7 +5,7 @@
   import { Route, Router } from 'svelte-routing'
 </script>
 
-<div class="grid justify-center content-center h-full w-full">
+<div class="grid justify-center content-start h-full w-full">
   <Router>
     <Route path="/file-viewer" component={FileViewer} />
     <Route path="*" component={FilePicker} />

@@ -16,7 +16,8 @@
             "args": [
                 "-l./src/lib/",
                 "-e=\"./src/main.php\"",
-                "--serve"
+                "--input-file=\"numbers.csv\"",
+                "--output-file=\"output.json\""
             ],
             "runtimeArgs": [
                 "-dxdebug.start_with_request=yes",

@@ -111,7 +111,7 @@
   </div>
 {/if}
 
-<div class="fixed right-7 top-6 pointer-events-none ">
+<div class="fixed right-7 top-2 pointer-events-none ">
   <div
     class="
         relative

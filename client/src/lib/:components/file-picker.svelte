@@ -4,7 +4,7 @@
   import { mdiFile, mdiListBox, mdiUpload } from '@mdi/js'
   import axios from 'axios'
   import { navigate } from 'svelte-routing'
-    import { append } from 'svelte/internal'
+  import { append } from 'svelte/internal'
   let fileInput: HTMLInputElement
   let file: null | File = null
   let base64: string = ''
@@ -33,7 +33,7 @@
     btn-primary
     fixed
     right-32
-    top-6
+    top-2
     z-10
   "
   style="pointer-events: all;"
@@ -68,11 +68,11 @@
   class="btn btn-primary"
   on:mousedown={async () => {
     try {
-      if(!file) return
+      if (!file) return
 
       const form = new FormData()
 
-      form.append("file", file)
+      form.append('file', file)
 
       const response = await axios.post('/api/repository', form, {
         headers: {

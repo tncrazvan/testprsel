@@ -12,7 +12,8 @@ use App\ParserResult;
 use App\Service\ParserService;
 
 use CatPaw\Attributes\Option;
-use function CatPaw\CUI\text;
+
+use CatPaw\Utilities\StringExpansion;
 use function CatPaw\uuid;
 use CatPaw\Web\Attributes\Header;
 
@@ -30,18 +31,19 @@ use Psr\Log\LoggerInterface;
 function main(
     LoggerInterface $logger,
     ParserService $service,
-    #[Option("--filename")] string $fileName,
+    #[Option("--input-file")] string $inputFile,
+    #[Option("--output-file")] string $outputFile,
     #[Option("--serve")] false|string $serve,
 ) {
     if (false !== $serve) {
         $interface = $serve?$serve:'127.0.0.1:8000';
 
         Route::notFound(function(
-            HttpConfiguration $config,
             #[Header("range")] false | array $range,
-            Request $request,
             ByteRangeService $byterange,
+            HttpConfiguration $config,
             LoggerInterface $logger,
+            Request $request,
         ):mixed {
             static $fileServer = false;
             if (!$fileServer) {
@@ -69,20 +71,20 @@ function main(
         return;
     }
 
-    if (!$fileName && !$serve) {
-        $logger->error("Please specify a --filename or start the server with --serve.");
+    if ($outputFile && !$inputFile) {
+        $logger->error("Please specify a valid --filename.");
         die();
     }
 
-    if (!yield exists($fileName)) {
-        $logger->error("File $fileName not found.");
+    if (!yield exists($inputFile)) {
+        $logger->error("File $inputFile not found.");
         die();
     }
 
-    $contents = yield read($fileName);
+    $contents = yield read($inputFile);
 
-    $fileName = 'f'.uuid().'.csv';
-    $dirName  = dirname($fileName);
+    $inputFile = 'f'.uuid().'.csv';
+    $dirName   = dirname($inputFile);
 
 
     if (!yield isDirectory($dirName)) {
@@ -90,61 +92,116 @@ function main(
         yield createDirectoryRecursively($dirName);
     }
     
-    yield write($fileName, $contents);
+    yield write($inputFile, $contents);
 
-    $items = $service->parse($fileName);
+    $items = $service->parse($inputFile);
 
-    yield deleteFile($fileName);
+    yield deleteFile($inputFile);
 
-    $correctLines   = [];
-    $incorrectLines = [];
 
-    for ($items->rewind();$items->valid();$items->next()) {
-        $removed = [];
-        
-        /** @var ParserResult $cell */
-        $cell = $items->current();
+    $acceptableResults            = [];
+    $successfulCorrectionsResults = [];
+    $failedCorrectionsResults     = [];
 
-        foreach ($cell->removed as $piece) {
-            $removed[] = text("$piece", [0,0,0], [255,100,100]);
+    if ($outputFile) {
+        for ($items->rewind();$items->valid();$items->next()) {
+            /** @var ParserResult */
+            $item = $items->current();
+
+            if ($item->corrected === $item->original && $item->isCorrect) {
+                $acceptableResults[] = [
+                    "id"        => $item->id,
+                    "original"  => $item->original,
+                    "corrected" => $item->corrected,
+                    "isCorrect" => $item->isCorrect,
+                ];
+            } else if ($item->corrected !== $item->original && $item->isCorrect) {
+                $successfulCorrectionsResults[] = [
+                    "id"        => $item->id,
+                    "original"  => $item->original,
+                    "corrected" => $item->corrected,
+                    "isCorrect" => $item->isCorrect,
+                ];
+            } else {
+                $failedCorrectionsResults[] = [
+                    "id"        => $item->id,
+                    "original"  => $item->original,
+                    "corrected" => $item->corrected,
+                    "isCorrect" => $item->isCorrect,
+                ];
+            }
         }
         
-        $valueStringified = text($cell->corrected, [0,150,150]);
+        $acceptableFile            = StringExpansion::variable($outputFile, ["type" => "acceptable"]);
+        $successfulCorrectionsFile = StringExpansion::variable($outputFile, ["type" => "successul-corrections"]);
+        $failedCOrrectionsFile     = StringExpansion::variable($outputFile, ["type" => "failed-corrections"]);
+
+        if ($acceptableFile === $outputFile) {
+            $acceptableFile = "acceptable-$outputFile";
+        }
+
+        if ($successfulCorrectionsFile === $outputFile) {
+            $successfulCorrectionsFile = "successul-corrections-$outputFile";
+        }
+
+        if ($failedCOrrectionsFile === $outputFile) {
+            $failedCOrrectionsFile = "failed-corrections-$outputFile";
+        }
+        
+        if (yield exists($acceptableFile)) {
+            yield deleteFile($acceptableFile);
+        }
+
+        if (yield exists($successfulCorrectionsFile)) {
+            yield deleteFile($successfulCorrectionsFile);
+        }
+
+        if (yield exists($failedCOrrectionsFile)) {
+            yield deleteFile($failedCOrrectionsFile);
+        }
         
 
-        $removedStringified = join(',', $removed);
-        $removedStringified = join(',', array_filter([$removedStringified], fn ($item) => $item));
+        if (str_ends_with(strtolower($outputFile), '.csv')) {
+            $logger->info("Writing acceptable results to $acceptableFile...");
+            $handle = fopen($acceptableFile, "w");
+            fputcsv($handle, ['id','original','corrected','is_correct']);
+            foreach ($acceptableResults as $result) {
+                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+                fputcsv($handle, $result);
+            }
+            fclose($handle);
+            $logger->info("Ok.");
 
-        if ($removedStringified) {
-            $removedStringified = "[REMOVED:$removedStringified]";
-        }
-
-        $originalStringified = '';
-
-        if ($removedStringified) {
-            $originalStringified = "[ORIGINAL:".text($cell->original, [100,100,200])."]";
-        }
-
-        if ($cell->isCorrect) {
-            $correctLines[] = "[ID:$cell->id] $valueStringified $removedStringified $originalStringified";
+            $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
+            $handle = fopen($successfulCorrectionsFile, "w");
+            fputcsv($handle, ['id','original','corrected','is_correct']);
+            foreach ($successfulCorrectionsResults as $result) {
+                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+                fputcsv($handle, $result);
+            }
+            fclose($handle);
+            $logger->info("Ok.");
+            
+            $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
+            $handle = fopen($failedCOrrectionsFile, "w");
+            fputcsv($handle, ['id','original','corrected','is_correct']);
+            foreach ($failedCorrectionsResults as $result) {
+                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+                fputcsv($handle, $result);
+            }
+            fclose($handle);
+            $logger->info("Ok.");
         } else {
-            $incorrectLines[] = "[ID:$cell->id] $valueStringified $removedStringified $originalStringified";
+            $logger->info("Writing acceptable results to $acceptableFile...");
+            yield write($acceptableFile, json_encode($acceptableResults));
+            $logger->info("Ok.");
+            $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
+            yield write($successfulCorrectionsFile, json_encode($successfulCorrectionsResults));
+            $logger->info("Ok.");
+            $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
+            yield write($failedCOrrectionsFile, json_encode($failedCorrectionsResults));
+            $logger->info("Ok.");
         }
-    }
-    
-    $countCorrect  = count($correctLines);
-    $countInorrect = count($incorrectLines);
-
-
-    echo "======== CORRECT NUMBERS ($countCorrect) ==========".PHP_EOL;
-    foreach ($correctLines as $line) {
-        echo $line.PHP_EOL;
-    }
-
-    
-    echo "======== INCORRECT NUMBERS ($countInorrect) ========".PHP_EOL;
-    foreach ($incorrectLines as $line) {
-        echo $line.PHP_EOL;
     }
 
     $logger->info("done!");
