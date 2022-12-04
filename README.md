@@ -1,3 +1,7 @@
+# Premise
+
+This project has only been tested on Ubuntu (PopOS) and Windows 11.
+
 # Getting Started
 
 Php8.1+ and the following extensions are required
