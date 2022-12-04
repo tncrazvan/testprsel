@@ -1,6 +1,6 @@
 # Premise
 
-This project has only been tested on Windows 11 and Ubuntu (PopOS)
+This project has only been tested on Windows 11 (lates version as of 2022/12/04) and Ubuntu (PopOS)
 
 ```sh
 Distributor ID:	Pop
