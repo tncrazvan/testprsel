@@ -31,12 +31,12 @@ use Psr\Log\LoggerInterface;
 function main(
     LoggerInterface $logger,
     ParserService $service,
-    #[Option("--input-file")] string $inputFile,
-    #[Option("--output-file")] string $outputFile,
+    #[Option("--input")] string $inputFile,
+    #[Option("--output")] string $outputFile,
     #[Option("--serve")] false|string $serve,
 ) {
     if (false === $serve && !$inputFile) {
-        $logger->error("Please specify a valid --input-file or run the server with --serve.");
+        $logger->error("Please specify a valid --input or run the server with --serve.");
         die();
     }
 
@@ -77,7 +77,7 @@ function main(
     }
 
     if (!$outputFile) {
-        $outputFile = '{{type}}-output.json';
+        $outputFile = '{{type}}.json';
     }
 
     if (!yield exists($inputFile)) {
@@ -107,105 +107,103 @@ function main(
     $successfulCorrectionsResults = [];
     $failedCorrectionsResults     = [];
 
-    if ($outputFile) {
-        for ($items->rewind();$items->valid();$items->next()) {
-            /** @var ParserResult */
-            $item = $items->current();
+    for ($items->rewind();$items->valid();$items->next()) {
+        /** @var ParserResult */
+        $item = $items->current();
 
-            if ($item->corrected === $item->original && $item->isCorrect) {
-                $acceptableResults[] = [
-                    "id"        => $item->id,
-                    "original"  => $item->original,
-                    "corrected" => $item->corrected,
-                    "isCorrect" => $item->isCorrect,
-                ];
-            } else if ($item->corrected !== $item->original && $item->isCorrect) {
-                $successfulCorrectionsResults[] = [
-                    "id"        => $item->id,
-                    "original"  => $item->original,
-                    "corrected" => $item->corrected,
-                    "isCorrect" => $item->isCorrect,
-                ];
-            } else {
-                $failedCorrectionsResults[] = [
-                    "id"        => $item->id,
-                    "original"  => $item->original,
-                    "corrected" => $item->corrected,
-                    "isCorrect" => $item->isCorrect,
-                ];
-            }
-        }
-        
-        $acceptableFile            = StringExpansion::variable($outputFile, ["type" => "acceptable"]);
-        $successfulCorrectionsFile = StringExpansion::variable($outputFile, ["type" => "successul-corrections"]);
-        $failedCOrrectionsFile     = StringExpansion::variable($outputFile, ["type" => "failed-corrections"]);
-
-        if ($acceptableFile === $outputFile) {
-            $acceptableFile = "acceptable-$outputFile";
-        }
-
-        if ($successfulCorrectionsFile === $outputFile) {
-            $successfulCorrectionsFile = "successul-corrections-$outputFile";
-        }
-
-        if ($failedCOrrectionsFile === $outputFile) {
-            $failedCOrrectionsFile = "failed-corrections-$outputFile";
-        }
-        
-        if (yield exists($acceptableFile)) {
-            yield deleteFile($acceptableFile);
-        }
-
-        if (yield exists($successfulCorrectionsFile)) {
-            yield deleteFile($successfulCorrectionsFile);
-        }
-
-        if (yield exists($failedCOrrectionsFile)) {
-            yield deleteFile($failedCOrrectionsFile);
-        }
-        
-
-        if (str_ends_with(strtolower($outputFile), '.csv')) {
-            $logger->info("Writing acceptable results to $acceptableFile...");
-            $handle = fopen($acceptableFile, "w");
-            fputcsv($handle, ['id','original','corrected','is_correct']);
-            foreach ($acceptableResults as $result) {
-                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
-                fputcsv($handle, $result);
-            }
-            fclose($handle);
-            $logger->info("Ok.");
-
-            $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
-            $handle = fopen($successfulCorrectionsFile, "w");
-            fputcsv($handle, ['id','original','corrected','is_correct']);
-            foreach ($successfulCorrectionsResults as $result) {
-                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
-                fputcsv($handle, $result);
-            }
-            fclose($handle);
-            $logger->info("Ok.");
-            
-            $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
-            $handle = fopen($failedCOrrectionsFile, "w");
-            fputcsv($handle, ['id','original','corrected','is_correct']);
-            foreach ($failedCorrectionsResults as $result) {
-                $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
-                fputcsv($handle, $result);
-            }
-            fclose($handle);
-            $logger->info("Ok.");
+        if ($item->corrected === $item->original && $item->isCorrect) {
+            $acceptableResults[] = [
+                "id"        => $item->id,
+                "original"  => $item->original,
+                "corrected" => $item->corrected,
+                "isCorrect" => $item->isCorrect,
+            ];
+        } else if ($item->corrected !== $item->original && $item->isCorrect) {
+            $successfulCorrectionsResults[] = [
+                "id"        => $item->id,
+                "original"  => $item->original,
+                "corrected" => $item->corrected,
+                "isCorrect" => $item->isCorrect,
+            ];
         } else {
-            $logger->info("Writing acceptable results to $acceptableFile...");
-            yield write($acceptableFile, json_encode($acceptableResults));
-            $logger->info("Ok.");
-            $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
-            yield write($successfulCorrectionsFile, json_encode($successfulCorrectionsResults));
-            $logger->info("Ok.");
-            $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
-            yield write($failedCOrrectionsFile, json_encode($failedCorrectionsResults));
-            $logger->info("Ok.");
+            $failedCorrectionsResults[] = [
+                "id"        => $item->id,
+                "original"  => $item->original,
+                "corrected" => $item->corrected,
+                "isCorrect" => $item->isCorrect,
+            ];
         }
+    }
+        
+    $acceptableFile            = StringExpansion::variable($outputFile, ["type" => "acceptable"]);
+    $successfulCorrectionsFile = StringExpansion::variable($outputFile, ["type" => "successul-corrections"]);
+    $failedCOrrectionsFile     = StringExpansion::variable($outputFile, ["type" => "failed-corrections"]);
+
+    if ($acceptableFile === $outputFile) {
+        $acceptableFile = "acceptable-$outputFile";
+    }
+
+    if ($successfulCorrectionsFile === $outputFile) {
+        $successfulCorrectionsFile = "successul-corrections-$outputFile";
+    }
+
+    if ($failedCOrrectionsFile === $outputFile) {
+        $failedCOrrectionsFile = "failed-corrections-$outputFile";
+    }
+        
+    if (yield exists($acceptableFile)) {
+        yield deleteFile($acceptableFile);
+    }
+
+    if (yield exists($successfulCorrectionsFile)) {
+        yield deleteFile($successfulCorrectionsFile);
+    }
+
+    if (yield exists($failedCOrrectionsFile)) {
+        yield deleteFile($failedCOrrectionsFile);
+    }
+        
+
+    if (str_ends_with(strtolower($outputFile), '.csv')) {
+        $logger->info("Writing acceptable results to $acceptableFile...");
+        $handle = fopen($acceptableFile, "w");
+        fputcsv($handle, ['id','original','corrected','is_correct']);
+        foreach ($acceptableResults as $result) {
+            $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+            fputcsv($handle, $result);
+        }
+        fclose($handle);
+        $logger->info("Ok.");
+
+        $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
+        $handle = fopen($successfulCorrectionsFile, "w");
+        fputcsv($handle, ['id','original','corrected','is_correct']);
+        foreach ($successfulCorrectionsResults as $result) {
+            $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+            fputcsv($handle, $result);
+        }
+        fclose($handle);
+        $logger->info("Ok.");
+            
+        $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
+        $handle = fopen($failedCOrrectionsFile, "w");
+        fputcsv($handle, ['id','original','corrected','is_correct']);
+        foreach ($failedCorrectionsResults as $result) {
+            $result['isCorrect'] = ($result['isCorrect'] ?? false)?'true':'false';
+            fputcsv($handle, $result);
+        }
+        fclose($handle);
+        $logger->info("Ok.");
+    } else {
+        $logger->info("Writing acceptable results to $acceptableFile...");
+        yield write($acceptableFile, json_encode($acceptableResults));
+        $logger->info("Ok.");
+        $logger->info("Writing acceptable results to $successfulCorrectionsFile...");
+        yield write($successfulCorrectionsFile, json_encode($successfulCorrectionsResults));
+        $logger->info("Ok.");
+        $logger->info("Writing acceptable results to $failedCOrrectionsFile...");
+        yield write($failedCOrrectionsFile, json_encode($failedCorrectionsResults));
+        $logger->info("Ok.");
     }
 
     $logger->info("done!");
