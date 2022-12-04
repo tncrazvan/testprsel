@@ -2,19 +2,14 @@
 
 namespace App\Service;
 
-use function Amp\call;
-use function Amp\File\createDirectoryRecursively;
 use function Amp\File\deleteFile;
 use function Amp\File\exists;
-use function Amp\File\isDirectory;
-use function Amp\File\write;
 use Amp\Promise;
 
 use function App\normalize;
 use App\ParserResult;
 
 use CatPaw\Attributes\Service;
-use function CatPaw\deleteDirectoryRecursively;
 use CatPaw\Utilities\LinkedList;
 use Error;
 use InvalidArgumentException;
@@ -68,30 +63,6 @@ class ParserService {
         static $pattern = '/^[0-9]{11,}$/';
         $result         = preg_match($pattern, $hystack);
         return false !== $result && $result > 0;
-    }
-
-    /**
-     * Save phone numbers in repository.
-     * @param  string        $fileName
-     * @param  string        $content
-     * @throws Error
-     * @return Promise<void>
-     */
-    public function save(string $fileName, string $content):Promise {
-        return call(function() use ($fileName, $content) {
-            $dirName = dirname($fileName);
-            if (!yield exists($dirName)) {
-                yield createDirectoryRecursively($dirName);
-            } else {
-                if (yield isDirectory($dirName)) {
-                    // yield deleteDirectoryRecursively($dirName);
-                    yield createDirectoryRecursively($dirName);
-                } else {
-                    yield deleteFile($dirName);
-                }
-            }
-            yield write($fileName, $content);
-        });
     }
 
     /**

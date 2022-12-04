@@ -4507,7 +4507,7 @@ const func = (item) => item.corrected === item.original;
 const func_1 = (item) => item.corrected !== item.original && item.isCorrect;
 const func_2 = (item) => item.corrected !== item.original && !item.isCorrect;
 function instance$1($$self, $$props, $$invalidate) {
-  const parse = () => axios$1.get("/api/repository/parse");
+  const parse = () => axios$1.get("/api/repository");
   let index = 0;
   const mousedown_handler = () => navigate("/");
   const mousedown_handler_1 = () => $$invalidate(0, index = 0);

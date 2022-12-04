@@ -7,7 +7,7 @@
   import axios from 'axios'
   import { navigate } from 'svelte-routing'
   const parse = () =>
-    axios.get<ServerResponse<Array<ParserResult>>>('/api/repository/parse')
+    axios.get<ServerResponse<Array<ParserResult>>>('/api/repository')
   let index = 0
 </script>
 
