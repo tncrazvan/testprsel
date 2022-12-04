@@ -1,6 +1,13 @@
 # Premise
 
-This project has only been tested on Ubuntu (PopOS) and Windows 11.
+This project has only been tested on Windows 11 and Ubuntu (PopOS)
+
+```sh
+Distributor ID:	Pop
+Description:	Pop!_OS 22.04 LTS
+Release:	22.04
+Codename:	jammy
+```
 
 # Getting Started
 
