@@ -35,6 +35,11 @@ function main(
     #[Option("--output-file")] string $outputFile,
     #[Option("--serve")] false|string $serve,
 ) {
+    if (false === $serve && !$inputFile) {
+        $logger->error("Please specify a valid --input-file or run the server with --serve.");
+        die();
+    }
+
     if (false !== $serve) {
         $interface = $serve?$serve:'127.0.0.1:8000';
 
@@ -71,9 +76,8 @@ function main(
         return;
     }
 
-    if ($outputFile && !$inputFile) {
-        $logger->error("Please specify a valid --filename.");
-        die();
+    if (!$outputFile) {
+        $outputFile = '{{type}}-output.json';
     }
 
     if (!yield exists($inputFile)) {
