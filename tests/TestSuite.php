@@ -3,6 +3,8 @@
 use Amp\Loop;
 
 use function App\normalize;
+use function App\save;
+
 use App\Service\ParserService;
 
 use CatPaw\Utilities\LoggerFactory;
@@ -57,7 +59,7 @@ class TestSuite extends TestCase {
             $this->assertEquals("dqwerqw", $attempt2->removed[2]);
 
             $tmp = __DIR__.'/f'.uuid().'.csv';
-            yield $parser->save($tmp, <<<CSV
+            yield save($tmp, <<<CSV
                 id,sms_phone
                 103343262,6478342944
                 103300640,730276061
